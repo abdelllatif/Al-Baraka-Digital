@@ -64,8 +64,6 @@ public class OperationServiceImpl implements OperationService {
         Operation operation = new Operation();
         operation.setType(request.getType());
         operation.setAmount(request.getAmount());
-        
-        // Handle different operation types
         switch (request.getType()) {
             case DEPOSIT:
                 handleDeposit(request, operation, client);
@@ -80,7 +78,6 @@ public class OperationServiceImpl implements OperationService {
                 throw new IllegalArgumentException("Invalid operation type");
         }
         
-        // Determine status based on amount
         if (request.getAmount().compareTo(THRESHOLD_AMOUNT) > 0) {
             operation.setStatus(OperationStatus.PENDING);
         } else {
@@ -106,8 +103,6 @@ public class OperationServiceImpl implements OperationService {
             .stream()
             .findFirst()
             .orElseThrow(() -> new ResourceNotFoundException("Account not found for client"));
-        
-        // Check balance if status is approved
         if (request.getAmount().compareTo(account.getBalance()) > 0) {
             throw new IllegalArgumentException("Insufficient balance");
         }
@@ -126,8 +121,6 @@ public class OperationServiceImpl implements OperationService {
         
         Account destinationAccount = accountRepository.findById(request.getAccountDestinationId())
             .orElseThrow(() -> new ResourceNotFoundException("Account", request.getAccountDestinationId()));
-        
-        // Check balance if status will be approved
         if (request.getAmount().compareTo(THRESHOLD_AMOUNT) <= 0) {
             if (request.getAmount().compareTo(sourceAccount.getBalance()) > 0) {
                 throw new IllegalArgumentException("Insufficient balance");
@@ -153,13 +146,10 @@ public class OperationServiceImpl implements OperationService {
         }
         
         try {
-            // Create upload directory if it doesn't exist
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
-            
-            // Generate unique filename
             String originalFilename = file.getOriginalFilename();
             String fileExtension = originalFilename != null && originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
@@ -187,8 +177,6 @@ public class OperationServiceImpl implements OperationService {
     public List<Operation> getClientOperations(Long clientId) {
         List<Operation> sourceOps = operationRepository.findByAccountSourceOwnerId(clientId);
         List<Operation> destOps = operationRepository.findByAccountDestinationOwnerId(clientId);
-        
-        // Combine and remove duplicates
         sourceOps.addAll(destOps);
         return sourceOps.stream()
             .distinct()
@@ -212,11 +200,8 @@ public class OperationServiceImpl implements OperationService {
         if (operation.getStatus() != OperationStatus.PENDING) {
             throw new IllegalArgumentException("Only pending operations can be approved");
         }
-        
         operation.setStatus(OperationStatus.APPROVED);
         operation.setValidatedAt(LocalDateTime.now());
-        
-        // Execute the operation
         executeOperation(operation);
         
         return operationRepository.save(operation);

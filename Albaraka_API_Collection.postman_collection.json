@@ -1,0 +1,440 @@
+{
+	"info": {
+		"_postman_id": "albaraka-api-collection",
+		"name": "Albaraka API Collection",
+		"description": "Complete API collection for Albaraka Banking System with all endpoints, DTOs, and entities documented",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Authenticate a user and receive a JWT token.\n\n**Request Body (LoginRequest):**\n- `email` (String, required): Valid email address\n- `password` (String, required): User password\n\n**Response (LoginResponse):**\n- `token` (String): JWT authentication token\n- `email` (String): User email\n- `role` (Role enum): User role (CLIENT, AGENT_BANCAIRE, ADMIN)\n- `userId` (Long): User ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user login"
+		},
+		{
+			"name": "Admin - User Management",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"description": "JWT token (optional - security not fully implemented)"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"CLIENT\",\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
+						},
+						"description": "Create a new user. Admin only.\n\n**Request Body (User Entity):**\n- `fullName` (String, required): User's full name\n- `email` (String, required, unique): User's email address\n- `password` (String, required): User's password (will be encrypted)\n- `role` (Role enum, required): User role - CLIENT, AGENT_BANCAIRE, or ADMIN\n- `active` (Boolean, optional, default: true): Whether the user is active\n\n**Note:** `id` and `createdAt` are auto-generated\n\n**Response:** User object with generated ID and createdAt timestamp"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"John Doe Updated\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"newpassword123\",\n    \"role\": \"AGENT_BANCAIRE\",\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "User ID"
+								}
+							]
+						},
+						"description": "Update an existing user by ID. Admin only.\n\n**Path Parameters:**\n- `id` (Long): User ID to update\n\n**Request Body (User Entity):**\n- `fullName` (String, required): Updated full name\n- `email` (String, required): Updated email\n- `password` (String, required): Updated password (will be encrypted)\n- `role` (Role enum, required): Updated role\n- `active` (Boolean): Updated active status\n\n**Response:** Updated User object"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/admin/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "User ID"
+								}
+							]
+						},
+						"description": "Delete a user by ID. Admin only.\n\n**Path Parameters:**\n- `id` (Long): User ID to delete\n\n**Response:** 204 No Content on success"
+					},
+					"response": []
+				}
+			],
+			"description": "Admin endpoints for managing users"
+		},
+		{
+			"name": "Client - Operations",
+			"item": [
+				{
+					"name": "Create Operation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-User-Id",
+								"value": "1",
+								"description": "Client user ID"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"DEPOSIT\",\n    \"amount\": 1000.00,\n    \"accountSourceId\": null,\n    \"accountDestinationId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/client/operations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"client",
+								"operations"
+							]
+						},
+						"description": "Create a new operation (deposit, withdrawal, or transfer).\n\n**Headers:**\n- `X-User-Id` (Long, required): Client user ID\n\n**Request Body (OperationRequest):**\n- `type` (OperationType enum, required): Operation type - DEPOSIT, WITHDRAWAL, or TRANSFER\n- `amount` (BigDecimal, required, min: 0.01): Operation amount\n- `accountSourceId` (Long, optional): Source account ID (required for WITHDRAWAL and TRANSFER)\n- `accountDestinationId` (Long, optional): Destination account ID (required for DEPOSIT and TRANSFER)\n\n**Response:** Created Operation object with:\n- `id` (Long): Operation ID\n- `type` (OperationType): Operation type\n- `amount` (BigDecimal): Operation amount\n- `status` (OperationStatus): Status (PENDING, APPROVED, REJECTED, EXECUTED)\n- `createdAt` (LocalDateTime): Creation timestamp\n- `validatedAt` (LocalDateTime, nullable): Validation timestamp\n- `executedAt` (LocalDateTime, nullable): Execution timestamp\n- `accountSource` (Account, nullable): Source account\n- `accountDestination` (Account, nullable): Destination account\n- `documents` (List<Document>): Associated documents"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Client Operations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "1",
+								"description": "Client user ID"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/client/operations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"client",
+								"operations"
+							]
+						},
+						"description": "Get all operations for the authenticated client.\n\n**Headers:**\n- `X-User-Id` (Long, required): Client user ID\n\n**Response:** List of Operation objects belonging to the client"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Document file to upload (max 10MB)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/client/operations/:id/document",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"client",
+								"operations",
+								":id",
+								"document"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "Operation ID"
+								}
+							]
+						},
+						"description": "Upload a document for a specific operation.\n\n**Path Parameters:**\n- `id` (Long): Operation ID\n\n**Form Data:**\n- `file` (MultipartFile, required): Document file (max size: 10MB)\n\n**Response (DocumentUploadResponse):**\n- `documentId` (Long): Created document ID\n- `fileName` (String): Original file name\n- `fileType` (String): File MIME type\n- `message` (String): Success message\n\n**Note:** Supported file types depend on server configuration"
+					},
+					"response": []
+				}
+			],
+			"description": "Client endpoints for managing operations"
+		},
+		{
+			"name": "Agent - Operations",
+			"item": [
+				{
+					"name": "Get Pending Operations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/operations/pending",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"operations",
+								"pending"
+							]
+						},
+						"description": "Get all pending operations that need agent approval.\n\n**Response:** List of Operation objects with status PENDING"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Operation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "2",
+								"description": "Agent user ID"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/operations/:id/approve",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"operations",
+								":id",
+								"approve"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "Operation ID"
+								}
+							]
+						},
+						"description": "Approve a pending operation. Agent only.\n\n**Path Parameters:**\n- `id` (Long): Operation ID to approve\n\n**Headers:**\n- `X-User-Id` (Long, required): Agent user ID\n\n**Response:** Updated Operation object with status APPROVED and validatedAt timestamp set"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Operation",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "2",
+								"description": "Agent user ID"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/agent/operations/:id/reject",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"agent",
+								"operations",
+								":id",
+								"reject"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "Operation ID"
+								}
+							]
+						},
+						"description": "Reject a pending operation. Agent only.\n\n**Path Parameters:**\n- `id` (Long): Operation ID to reject\n\n**Headers:**\n- `X-User-Id` (Long, required): Agent user ID\n\n**Response:** Updated Operation object with status REJECTED and validatedAt timestamp set"
+					},
+					"response": []
+				}
+			],
+			"description": "Agent endpoints for managing and approving operations"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
