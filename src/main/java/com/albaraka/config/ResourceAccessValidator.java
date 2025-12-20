@@ -24,6 +24,12 @@ public class ResourceAccessValidator {
         }
     }
 
-
+    public void validateUserAccess(User targetUser, Long userId) {
+        if (!targetUser.getId().equals(userId)) {
+            throw new AccessDeniedException(
+                    "You do not have permission to access user with id: " + targetUser.getId()
+            );
+        }
+    }
 
 }
