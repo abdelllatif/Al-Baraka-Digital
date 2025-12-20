@@ -1,14 +1,18 @@
 package com.albaraka.controllers;
 
+import com.albaraka.config.CustomUserDetails;
 import com.albaraka.dto.DocumentUploadResponse;
 import com.albaraka.dto.OperationRequest;
 import com.albaraka.models.Document;
 import com.albaraka.models.Operation;
 import com.albaraka.services.interfaces.OperationService;
+import com.albaraka.services.interfaces.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,16 +23,21 @@ import java.util.List;
 public class ClientOperationController {
     
     private final OperationService operationService;
-    
+    private final UserService userService;
+
     @Autowired
-    public ClientOperationController(OperationService operationService) {
+    public ClientOperationController(OperationService operationService, UserService userService) {
         this.operationService = operationService;
+        this.userService = userService;
     }
     
     @PostMapping
     public ResponseEntity<Operation> createOperation(
-            @RequestHeader("X-User-Id") Long clientId,
             @Valid @RequestBody OperationRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+       String email = customUserDetails.getUsername();
+       Long clientId = userService.findByEmail(email).getId();
         Operation operation = operationService.createOperation(clientId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(operation);
     }
