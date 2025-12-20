@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface OperationService {
     Operation createOperation(Long clientId, OperationRequest request);
-    Document uploadDocument(Long operationId, MultipartFile document);
+    Document uploadDocument(Long operationId, MultipartFile document,Long clientId);
     List<Operation> getClientOperations(Long clientId);
     List<Operation> getPendingOperations();
     Operation approveOperation(Long operationId, Long agentId);

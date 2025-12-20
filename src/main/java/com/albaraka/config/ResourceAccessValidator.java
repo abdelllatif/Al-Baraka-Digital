@@ -1,4 +1,4 @@
-package com.albaraka.security;
+package com.albaraka.config;
 
 import com.albaraka.models.Account;
 import com.albaraka.models.Operation;
