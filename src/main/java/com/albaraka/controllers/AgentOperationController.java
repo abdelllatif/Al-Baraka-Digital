@@ -18,12 +18,10 @@ public class AgentOperationController {
     
     private final OperationService operationService;
     private final UserService userService;
-    private final CustomUserDetails customUserDetails;
     @Autowired
-    public AgentOperationController(OperationService operationService, UserService userService, CustomUserDetails customUserDetails) {
+    public AgentOperationController(OperationService operationService, UserService userService) {
         this.operationService = operationService;
         this.userService = userService;
-        this.customUserDetails = customUserDetails;
     }
     
     @GetMapping("/pending")

@@ -60,7 +60,7 @@
 							{
 								"key": "Authorization",
 								"value": "Bearer {{token}}",
-								"description": "JWT token (optional - security not fully implemented)"
+								"description": "JWT token (required). Role: ADMIN"
 							}
 						],
 						"body": {
@@ -182,13 +182,9 @@
 								"value": "application/json"
 							},
 							{
-								"key": "X-User-Id",
-								"value": "1",
-								"description": "Client user ID"
-							},
-							{
 								"key": "Authorization",
-								"value": "Bearer {{token}}"
+								"value": "Bearer {{token}}",
+								"description": "JWT token (required). Role: CLIENT"
 							}
 						],
 						"body": {
@@ -221,13 +217,9 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-User-Id",
-								"value": "1",
-								"description": "Client user ID"
-							},
-							{
 								"key": "Authorization",
-								"value": "Bearer {{token}}"
+								"value": "Bearer {{token}}",
+								"description": "JWT token (required). Role: CLIENT"
 							}
 						],
 						"url": {
@@ -328,13 +320,9 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "X-User-Id",
-								"value": "2",
-								"description": "Agent user ID"
-							},
-							{
 								"key": "Authorization",
-								"value": "Bearer {{token}}"
+								"value": "Bearer {{token}}",
+								"description": "JWT token (required). Role: AGENT_BANCAIRE"
 							}
 						],
 						"url": {

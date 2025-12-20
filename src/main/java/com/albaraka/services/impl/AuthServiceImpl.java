@@ -1,5 +1,7 @@
 package com.albaraka.services.impl;
 
+import com.albaraka.config.CustomUserDetails;
+import com.albaraka.config.JwtUtil;
 import com.albaraka.dto.LoginRequest;
 import com.albaraka.dto.LoginResponse;
 import com.albaraka.enums.Role;
@@ -16,11 +18,12 @@ public class AuthServiceImpl implements AuthService {
     
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    
+    private final JwtUtil jwtUtil;
     @Autowired
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
     
     @Override
@@ -35,9 +38,8 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new UnauthorizedAccessException("Invalid email or password");
         }
-        
-        // TODO: Generate JWT token - will be implemented in security configuration
-        String token = "JWT_TOKEN_PLACEHOLDER";
+
+        String token = jwtUtil.generateToken(new CustomUserDetails(user));
         
         return new LoginResponse(token, user.getEmail(), user.getRole(), user.getId());
     }
