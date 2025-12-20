@@ -16,6 +16,14 @@ public class ResourceAccessValidator {
             );
         }
     }
+    public void validateAccountOwnership(Account account, Long userId) {
+        if (!account.getOwner().getId().equals(userId)) {
+            throw new AccessDeniedException(
+                    "You do not have permission to access account with id: " + account.getId()
+            );
+        }
+    }
+
 
 
 }
