@@ -1,5 +1,6 @@
 package com.albaraka.services.impl;
 
+import com.albaraka.config.ResourceAccessValidator;
 import com.albaraka.dto.OperationRequest;
 import com.albaraka.enums.OperationStatus;
 import com.albaraka.enums.OperationType;
@@ -39,7 +40,7 @@ public class OperationServiceImpl implements OperationService {
     private final AccountRepository accountRepository;
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
-    
+    private final ResourceAccessValidator accessValidator;
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
     
@@ -48,11 +49,13 @@ public class OperationServiceImpl implements OperationService {
             OperationRepository operationRepository,
             AccountRepository accountRepository,
             DocumentRepository documentRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            ResourceAccessValidator accessValidator) {
         this.operationRepository = operationRepository;
         this.accountRepository = accountRepository;
         this.documentRepository = documentRepository;
         this.userRepository = userRepository;
+        this.accessValidator = accessValidator;
     }
     
     @Override
@@ -140,7 +143,7 @@ public class OperationServiceImpl implements OperationService {
         if (operation.getStatus() != OperationStatus.PENDING) {
             throw new IllegalArgumentException("Documents can only be uploaded for pending operations");
         }
-        if(operation.getAccountSource().getOwner().getId().equals(clientId))
+        accessValidator.validateOperationOwnership(operation, clientId);
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be empty");
         }
