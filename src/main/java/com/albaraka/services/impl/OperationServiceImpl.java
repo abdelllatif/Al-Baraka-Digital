@@ -133,14 +133,14 @@ public class OperationServiceImpl implements OperationService {
     
     @Override
     @Transactional
-    public Document uploadDocument(Long operationId, MultipartFile file) {
+    public Document uploadDocument(Long operationId, MultipartFile file,Long clientId) {
         Operation operation = operationRepository.findById(operationId)
             .orElseThrow(() -> new ResourceNotFoundException("Operation", operationId));
         
         if (operation.getStatus() != OperationStatus.PENDING) {
             throw new IllegalArgumentException("Documents can only be uploaded for pending operations");
         }
-        
+        if(operation.getAccountSource().getOwner().getId().equals(clientId))
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be empty");
         }
