@@ -59,8 +59,11 @@ public class ClientOperationController {
     }
     
     @GetMapping
-    public ResponseEntity<List<Operation>> getClientOperations(
-            @RequestHeader("X-User-Id") Long clientId) {
+    public ResponseEntity<List<Operation>> getClientOperations() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        String email = customUserDetails.getUsername();
+        Long clientId = userService.findByEmail(email).getId();
         List<Operation> operations = operationService.getClientOperations(clientId);
         return ResponseEntity.ok(operations);
     }
