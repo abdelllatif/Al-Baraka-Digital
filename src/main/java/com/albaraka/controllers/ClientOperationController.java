@@ -46,7 +46,11 @@ public class ClientOperationController {
     public ResponseEntity<DocumentUploadResponse> uploadDocument(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
-        Document document = operationService.uploadDocument(id, file);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        String email = customUserDetails.getUsername();
+        Long clientId = userService.findByEmail(email).getId();
+        Document document = operationService.uploadDocument(id, file, clientId);
         
         DocumentUploadResponse response = new DocumentUploadResponse(
             document.getId(),

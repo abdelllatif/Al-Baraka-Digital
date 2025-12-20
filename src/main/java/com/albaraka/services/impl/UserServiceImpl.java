@@ -27,8 +27,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("User with email " + user.getEmail() + " already exists");
         }
-        
-        // Encode password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         
         return userRepository.save(user);
@@ -39,12 +37,9 @@ public class UserServiceImpl implements UserService {
     public User updateUser(Long id, User userDetails) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("User", id));
-        
-        // Update fields
         if (userDetails.getFullName() != null) {
             user.setFullName(userDetails.getFullName());
         }
-        
         if (userDetails.getEmail() != null && !userDetails.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(userDetails.getEmail())) {
                 throw new IllegalArgumentException("Email already exists");

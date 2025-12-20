@@ -159,17 +159,12 @@ public class OperationServiceImpl implements OperationService {
                 : "";
             String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
             Path filePath = uploadPath.resolve(uniqueFilename);
-            
-            // Save file
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            
-            // Create document entity
             Document document = new Document();
             document.setFileName(originalFilename != null ? originalFilename : uniqueFilename);
             document.setFileType(file.getContentType() != null ? file.getContentType() : "application/octet-stream");
             document.setStoragePath(filePath.toString());
             document.setOperation(operation);
-            
             return documentRepository.save(document);
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload file: " + e.getMessage(), e);
@@ -260,6 +255,7 @@ public class OperationServiceImpl implements OperationService {
     
     private void executeWithdrawal(Operation operation) {
         Account account = operation.getAccountSource();
+
         if (operation.getAmount().compareTo(account.getBalance()) > 0) {
             throw new IllegalArgumentException("Insufficient balance");
         }
