@@ -1,5 +1,6 @@
 package com.albaraka.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,9 +30,10 @@ public class Document {
     
     @Column(nullable = false, updatable = false)
     private LocalDateTime uploadedAt;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "operation_id", nullable = false)
+    @JsonBackReference
     private Operation operation;
     
     @PrePersist

@@ -2,6 +2,7 @@ package com.albaraka.models;
 
 import com.albaraka.enums.OperationStatus;
 import com.albaraka.enums.OperationType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,9 +49,10 @@ public class Operation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_destination_id")
     private Account accountDestination;
-    
-    @OneToMany(mappedBy = "operation", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Document> documents = new ArrayList<>();
+
+    @OneToOne(mappedBy = "operation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private Document document;
     
     @PrePersist
     protected void onCreate() {
