@@ -198,6 +198,9 @@ public class OperationServiceImpl implements OperationService {
         if (operation.getStatus() != OperationStatus.PENDING) {
             throw new IllegalArgumentException("Only pending operations can be approved");
         }
+        if(operation.getDocument() == null){
+            throw new IllegalArgumentException("Document is required for approval");
+        }
         operation.setStatus(OperationStatus.APPROVED);
         operation.setValidatedAt(LocalDateTime.now());
         executeOperation(operation);
