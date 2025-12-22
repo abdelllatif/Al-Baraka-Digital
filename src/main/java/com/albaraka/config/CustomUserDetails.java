@@ -1,6 +1,7 @@
 package com.albaraka.config;
 
 
+import com.albaraka.enums.Role;
 import com.albaraka.models.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +13,8 @@ import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
     private User user;
-
+    private Role role;
+    private Long id;
     public CustomUserDetails(User user) {
         this.user = user;
     }
@@ -22,6 +24,9 @@ public class CustomUserDetails implements UserDetails {
     public String getPassword() {
         return this.user.getPassword();
     }
+    public Long getId() {return this.user.getId();}
+
+    public String getRole() {return this.user.getRole().name();}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){

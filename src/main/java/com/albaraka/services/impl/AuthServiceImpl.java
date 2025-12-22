@@ -38,8 +38,10 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new UnauthorizedAccessException("Invalid email or password");
         }
-
-        String token = jwtUtil.generateToken(new CustomUserDetails(user));
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+        String token = jwtUtil.generateToken(userDetails,
+                userDetails.getId(),
+                userDetails.getRole());
         
         return new LoginResponse(token, user.getEmail(), user.getRole(), user.getId());
     }
