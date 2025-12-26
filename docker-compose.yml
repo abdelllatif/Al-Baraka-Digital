@@ -20,6 +20,7 @@ services:
     restart: always
     depends_on:
       - db
+      - keycloak
     environment:
       - DB_URL=${DB_URL}
       - DB_USER=${DB_USER}
@@ -29,6 +30,7 @@ services:
       - "8080:8080"
     volumes:
       - ./uploads:/uploads
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -40,5 +42,23 @@ services:
       - "8081:80"
     depends_on:
       - db
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak
+    restart: always
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev
+    ports:
+      - "8082:8080"
+    networks:
+      - albaraka-network
+
 volumes:
   pgdata:
+
+networks:
+  albaraka-network:
+    driver: bridge
