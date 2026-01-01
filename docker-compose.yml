@@ -1,38 +1,25 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:15
     container_name: postgres-db
     restart: always
+    env_file:
+      - .env
     environment:
       POSTGRES_DB: albaraka_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  backend:
-    build: .
-    container_name: spring-app
-    restart: always
-    depends_on:
-      - db
-    environment:
-      - DB_URL=${DB_URL}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./uploads:/uploads
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     restart: always
+    env_file:
+      - .env
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -40,5 +27,16 @@ services:
       - "8081:80"
     depends_on:
       - db
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: keycloak
+    command: start-dev
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+
 volumes:
   pgdata:
