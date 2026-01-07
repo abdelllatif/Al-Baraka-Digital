@@ -35,62 +35,19 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .csrf(csrf -> csrf.disable())
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-
-                        .requestMatchers("/web/admin/**")
-                        .hasRole(Role.ADMIN.name())
-
-                        .requestMatchers("/web/agent/**")
-                        .hasRole(Role.AGENT_BANCAIRE.name())
-
-                        .requestMatchers("/web/client/**")
-                        .hasRole(Role.CLIENT.name())
-
-                        .requestMatchers(
-                                "/web/login",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
-                        ).permitAll()
-
-                        .requestMatchers("/").authenticated()
-
                         .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
                         .requestMatchers("/api/agent/**").hasRole(Role.AGENT_BANCAIRE.name())
                         .requestMatchers("/api/client/**").hasRole(Role.CLIENT.name())
+                        .anyRequest().authenticated()
                 )
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
-
-                .formLogin(form -> form
-                        .loginPage("/web/login")
-                        .loginProcessingUrl("/auth/login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
-                        .defaultSuccessUrl("/", true)
-                        .permitAll()
-                )
-
-                .rememberMe(remember -> remember
-                        .rememberMeParameter("remember-me")
-                        .key("albaraka-remember-me-secret")
-                        .tokenValiditySeconds(7 * 24 * 60 * 60)
-                        .userDetailsService(userDetailsService)
-                )
-
-                .logout(logout -> logout
-                        .logoutUrl("/auth/logout")
-                        .deleteCookies("JSESSIONID", "remember-me")
-                        .invalidateHttpSession(true)
-                )
-
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -99,7 +56,6 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain oauth2FilterChain(HttpSecurity http) throws Exception {
-
         http
                 .securityMatcher("/api/agent/operations/pending")
                 .csrf(csrf -> csrf.disable())
