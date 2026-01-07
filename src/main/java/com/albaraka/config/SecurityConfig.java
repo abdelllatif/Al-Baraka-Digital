@@ -17,50 +17,100 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     @Autowired
     JwtAuthenticationFilter jwtFilter;
+
+    @Autowired
+    UserDetailsServiceImpl userDetailsService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     @Bean
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth ->
-            auth.requestMatchers("/auth/**").permitAll()
-                    .requestMatchers("/api/admin/users/**").permitAll()
-                    .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
-                    .requestMatchers("/api/agent/**").hasRole(Role.AGENT_BANCAIRE.name())
-                    .requestMatchers("/api/client/**").hasRole(Role.CLIENT.name())
-                    )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf(csrf -> csrf.disable())
+
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+
+                        .requestMatchers("/web/admin/**")
+                        .hasRole(Role.ADMIN.name())
+
+                        .requestMatchers("/web/agent/**")
+                        .hasRole(Role.AGENT_BANCAIRE.name())
+
+                        .requestMatchers("/web/client/**")
+                        .hasRole(Role.CLIENT.name())
+
+                        .requestMatchers(
+                                "/web/login",
+                                "/css/**",
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
+
+                        .requestMatchers("/").authenticated()
+
+                        .requestMatchers("/api/admin/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers("/api/agent/**").hasRole(Role.AGENT_BANCAIRE.name())
+                        .requestMatchers("/api/client/**").hasRole(Role.CLIENT.name())
                 )
+
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                )
+
+                .formLogin(form -> form
+                        .loginPage("/web/login")
+                        .loginProcessingUrl("/auth/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
+
+                .rememberMe(remember -> remember
+                        .rememberMeParameter("remember-me")
+                        .key("albaraka-remember-me-secret")
+                        .tokenValiditySeconds(7 * 24 * 60 * 60)
+                        .userDetailsService(userDetailsService)
+                )
+
+                .logout(logout -> logout
+                        .logoutUrl("/auth/logout")
+                        .deleteCookies("JSESSIONID", "remember-me")
+                        .invalidateHttpSession(true)
+                )
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
     @Bean
     @Order(1)
     public SecurityFilterChain oauth2FilterChain(HttpSecurity http) throws Exception {
+
         http
                 .securityMatcher("/api/agent/operations/pending")
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().hasAuthority("SCOPE_operations.read")
+                .authorizeHttpRequests(auth ->
+                        auth.anyRequest().hasAuthority("SCOPE_operations.read")
                 )
                 .oauth2ResourceServer(oauth2 ->
-
-                        oauth2.jwt(jwt ->jwt.jwtAuthenticationConverter(scopeJwtAuthenticationConverter())))
+                        oauth2.jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(scopeJwtAuthenticationConverter())
+                        )
+                )
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
@@ -69,19 +119,11 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-        converter.setAuthorityPrefix("ROLE_");
-        converter.setAuthoritiesClaimName("realm_access.roles");
 
-        JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
-        authConverter.setJwtGrantedAuthoritiesConverter(converter);
-        return authConverter;
-    }
     @Bean
     public JwtAuthenticationConverter scopeJwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter scopeConverter = new JwtGrantedAuthoritiesConverter();
@@ -93,4 +135,3 @@ public class SecurityConfig {
         return converter;
     }
 }
-

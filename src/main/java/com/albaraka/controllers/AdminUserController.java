@@ -18,7 +18,11 @@ public class AdminUserController {
     public AdminUserController(UserService userService) {
         this.userService = userService;
     }
-    
+    @GetMapping
+    public ResponseEntity<Iterable<User>> getAllUsers() {
+        Iterable<User> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
     @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         User createdUser = userService.createUser(user);
